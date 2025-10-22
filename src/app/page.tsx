@@ -4,26 +4,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Plus } from "lucide-react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import WordCard from "@/components/WordCard";
+import Image from "next/image";
 
 export default function Home() {
+  const router = useRouter();
   const words = useQuery(api.words.getWords) || [];
   const [query, setQuery] = useState("");
 
   const filteredWords = words.filter(word => word.word.toLowerCase().includes(query.toLowerCase()));
 
-  const handleAdd = () => {
-    redirect('/add-word');
-  }
-
   return (
     <main className="flex flex-col items-center justify-center text-black min-h-screen">
 
-      <div className="flex flex-col justify-center items-center mt-10 w-full">
-        <h1 className="text-3xl italic">Welcome to <span className="font-bold">Lexit</span></h1>
+      <div className="flex flex-col justify-center items-center mt-5 w-full">
+        <Image
+          src="/logo.png"
+          alt="Lexit Logo"
+          width={100}
+          height={100}
+        />
         <form className="flex my-10 gap-2 w-[80%]">
           <Input
             type="text"
@@ -50,14 +53,14 @@ export default function Home() {
             ))}
           </ul>
         ) : (
-          <p>No words found.</p>
+          <p className="flex items-center justify-center">No words found.</p>
         )}
       </div>
 
 
       {/* Footer */}
       <footer className="mt-auto mb-10 ml-auto mx-5">
-        <Button size="icon" className="rounded-full" onClick={handleAdd}>
+        <Button size="icon" className="rounded-full" onClick={() => router.push("/add-word")}>
           <Plus size={16} />
         </Button>
       </footer>
