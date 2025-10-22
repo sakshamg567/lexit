@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="public/logo.png" alt="Lexit Logo" width="120"/>
+</div>
+
 # Lexit - Personal Vocabulary Builder
 
 A web app for building your personal vocabulary with AI-powered definitions and examples.
