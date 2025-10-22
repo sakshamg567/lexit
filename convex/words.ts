@@ -1,5 +1,5 @@
-import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
 
 export const createWord = mutation({
   args: {
@@ -8,39 +8,44 @@ export const createWord = mutation({
     examples: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const id = await ctx.db.insert('words', {
+    const id = await ctx.db.insert("words", {
       word: args.word,
       meaning: args.meaning,
       examples: args.examples,
-    })
-    return id
-  }
-})
+    });
+    return id;
+  },
+});
 
 export const getWords = query({
   args: {},
   handler: async (ctx, args) => {
-    const words = await ctx.db.query('words').collect()
-    return words
-  }
-})
+    const words = await ctx.db.query("words").collect();
+    return words;
+  },
+});
 
 export const getWordByName = query({
   args: { word: v.string() },
   handler: async (ctx, args) => {
-    const word = await ctx.db.query('words').withIndex('by_word', q => q.eq('word', args.word)).first()
-    return word
-  }
-})
+    const allWords = await ctx.db.query("words").collect();
+    return allWords.find(
+      (w) => w.word.toLowerCase() === args.word.toLowerCase()
+    );
+  },
+});
 
 export const deleteWord = mutation({
   args: { word: v.string() },
   handler: async (ctx, args) => {
-    const word = await ctx.db.query('words').withIndex('by_word', q => q.eq('word', args.word)).first()
+    const word = await ctx.db
+      .query("words")
+      .withIndex("by_word", (q) => q.eq("word", args.word))
+      .first();
     if (word) {
-      await ctx.db.delete(word._id)
-      return true
+      await ctx.db.delete(word._id);
+      return true;
     }
-    return false
-  }
-})
+    return false;
+  },
+});
