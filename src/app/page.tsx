@@ -36,10 +36,10 @@ export default function Home() {
       </div>
 
       {/* Words List */}
-      <div className="w-full">
+      <div className="w-full max-h-[65vh] overflow-y-auto">
         {filteredWords.length > 0 ? (
           <ul>
-            {filteredWords.map((word, index) => (
+            {filteredWords.map((word) => (
               <WordCard
                 key={word.word}
                 word={word.word}

@@ -6,5 +6,5 @@ export default defineSchema({
     word: v.string(),
     meaning: v.string(),
     examples: v.array(v.string()),
-  })
+  }).index("by_word", ["word"]),
 })

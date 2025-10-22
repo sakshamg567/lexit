@@ -24,3 +24,11 @@ export const getWords = query({
     return words
   }
 })
+
+export const getWordByName = query({
+  args: { word: v.string() },
+  handler: async (ctx, args) => {
+    const word = await ctx.db.query('words').withIndex('by_word', q => q.eq('word', args.word)).first()
+    return word
+  }
+})
