@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif } from "next/font/google";
+import { ConvexClientProvider } from "@/utility/ConvexClientProvider";
 import "./globals.css";
 
 const InstrumentSerif = Instrument_Serif({
@@ -7,7 +8,6 @@ const InstrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
 });
-
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,7 +24,9 @@ export default function RootLayout({
       <body
         className={`${InstrumentSerif.variable} antialiased`}
       >
-        {children}
+        <ConvexClientProvider>
+          {children}
+        </ConvexClientProvider>
       </body>
     </html>
   );
