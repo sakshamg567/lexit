@@ -14,7 +14,6 @@ export async function POST(request: Request) {
 
     const cleaned = text.replace(/^```json\s*/, '').replace(/```$/, '');
     const parsed = JSON.parse(cleaned);
-    console.log('Parsed examples:', parsed.examples);
 
     return new Response(JSON.stringify({ examples: parsed.examples }), {
       status: 200,

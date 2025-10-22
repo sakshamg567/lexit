@@ -135,8 +135,8 @@ export default function AddWord() {
         </Button>
       </div>
       <div className="w-full px-6">
-        <h1 className="text-3xl">What new word did you discover?</h1>
-        <form className="mt-4" onSubmit={handleSubmit}>
+        <h1 className="text-3xl">Discovered a word?</h1>
+        <form className="mt-1" onSubmit={handleSubmit}>
           <Input
             type="text"
             name="word"

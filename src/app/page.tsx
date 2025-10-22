@@ -23,7 +23,7 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center text-black min-h-screen">
 
       <div className="flex flex-col justify-center items-center mt-10 w-full">
-        <h1 className="text-2xl italic">Welcome to <span className="font-bold">Lexit</span></h1>
+        <h1 className="text-3xl italic">Welcome to <span className="font-bold">Lexit</span></h1>
         <form className="flex my-10 gap-2 w-[80%]">
           <Input
             type="text"
@@ -39,7 +39,7 @@ export default function Home() {
       <div className="w-full max-h-[65vh] overflow-y-auto">
         {filteredWords.length > 0 ? (
           <ul>
-            {filteredWords.map((word) => (
+            {filteredWords.reverse().map((word) => (
               <WordCard
                 key={word.word}
                 word={word.word}
