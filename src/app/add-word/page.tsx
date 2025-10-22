@@ -117,6 +117,8 @@ export default function AddWord() {
     if (word.includes(" ")) return notifyError("Word cannot contain spaces");
     if (alreadyExists) return notifyError("Word already exists");
 
+    if (meaning.trim().length === 0 || examples.length === 0) return notifyError("Sit Tight while AI generates the meaning and examples!");
+
     try {
       void createWord({
         word,
