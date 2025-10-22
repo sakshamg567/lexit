@@ -5,12 +5,15 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { redirect } from "next/navigation";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import WordCard from "@/components/WordCard";
 
 export default function Home() {
-  const words = ["example", "test", "sample"];
+  const words = useQuery(api.words.getWords) || [];
   const [query, setQuery] = useState("");
 
-  const filteredWords = words.filter(word => word.toLowerCase().includes(query.toLowerCase()));
+  const filteredWords = words.filter(word => word.word.toLowerCase().includes(query.toLowerCase()));
 
   const handleAdd = () => {
     redirect('/add-word');
@@ -33,11 +36,17 @@ export default function Home() {
       </div>
 
       {/* Words List */}
-      <div>
+      <div className="w-full">
         {filteredWords.length > 0 ? (
           <ul>
             {filteredWords.map((word, index) => (
-              <li key={index} className="my-2">{word}</li>
+              <WordCard
+                key={word.word}
+                word={word.word}
+                meaning={word.meaning}
+                examples={word.examples}
+              />
+
             ))}
           </ul>
         ) : (
