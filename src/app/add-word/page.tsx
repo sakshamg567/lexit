@@ -30,13 +30,8 @@ export default function AddWord() {
   const [examplesLoading, setExamplesLoading] = useState(false);
 
   useEffect(() => {
-  console.log("useEffect fired, word:", word);
-}, [word]);
-
-  useEffect(() => {
     setMeaning("");
     setExamples([]);
-       toast(`Word changed: ${word}`);
 
     const convexSearch = setTimeout(() => {
       setDebouncedWord(word);
@@ -121,7 +116,7 @@ export default function AddWord() {
     if (word.includes(" ")) return notifyError("Word cannot contain spaces");
     if (alreadyExists) return notifyError("Word already exists");
     if (meaning.trim().length === 0 || examples.length === 0) return notifyError("Sit Tight while AI generates the meaning and examples!");
-     const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+    const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
     try {
       void createWord({
         word: capitalizedWord,
