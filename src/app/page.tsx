@@ -15,7 +15,16 @@ import {
   UserButton,
   useUser,
 } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import WordCard from "@/components/WordCard";
+import AlphabetFilter from "@/components/AlphabetFilter";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
 
@@ -29,14 +38,19 @@ export default function Home() {
   const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
 
   const [query, setQuery] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
-  const filteredWords = words.filter((word) =>
-    word.word.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredWords = words.filter((word) => {
+    const matchesQuery = word.word.toLowerCase().includes(query.toLowerCase());
+    const matchesLetter =
+      selectedLetter === null ||
+      word.word.charAt(0).toUpperCase() === selectedLetter;
+    return matchesQuery && matchesLetter;
+  });
 
   const isOwner = (ownerId: string) => {
-    if (ownerId == user?.id) return true;
+    if (ownerId === user?.id) return true;
     return false;
   };
 
@@ -138,9 +152,10 @@ export default function Home() {
           <UserButton />
         </SignedIn>
       </header>
-      <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
-        <Image src="/logo.png" alt="Lexit Logo" width={100} height={100} />
+      <div className="flex flex-col justify-center items-center w-full max-w-3xl mx-auto px-6">
+        <Image src="/logo.png" alt="Lexit Logo" width={60} height={60} />
         {wordsCount && (
+          <p className="mt-1 text-sm text-gray-600">Total {wordsCount} words</p>
           <p className="mt-2 text-gray-600">Total {wordsCount} words</p>
         )}
         <form className="flex my-10 gap-2 w-full">
@@ -178,15 +193,28 @@ export default function Home() {
             ))}
           </ul>
         ) : (
-          <p className="flex items-center justify-center">No words found.</p>
+          <p className="flex items-center justify-center">
+            {selectedLetter
+              ? `No words found starting with "${selectedLetter}".`
+              : "No words found."}
+          </p>
         )}
       </div>
 
-      {/* Footer */}
-      <footer className="mt-auto mb-10 ml-auto mx-5">
+      {/* Footer with Alphabet Filter */}
+      <footer className="mt-auto mb-6 w-full flex items-center justify-between">
+        <div className="w-full max-w-3xl mx-auto px-6 flex justify-center">
+          {words.length > 0 && (
+            <AlphabetFilter
+              words={words}
+              selectedLetter={selectedLetter}
+              onLetterSelect={setSelectedLetter}
+            />
+          )}
+        </div>
         <Button
           size="icon"
-          className="rounded-full"
+          className="rounded-full shrink-0 mr-6 mb-2"
           onClick={() => router.push("/add-word")}
         >
           <Plus size={16} />
