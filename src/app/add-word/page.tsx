@@ -139,6 +139,11 @@ export default function AddWord() {
     }
   };
 
+  const isOwner = (ownerId: string) => {
+    if (ownerId == user?.id) return true;
+    return false;
+  }
+
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
       <div className="w-full max-w-3xl mx-auto px-6">
@@ -220,6 +225,7 @@ export default function AddWord() {
             word={getWord?.word || ""}
             meaning={getWord?.meaning || ""}
             examples={getWord?.examples || []}
+            isOwner={isOwner(getWord?.owner || "")}
           />
         </div>
       )}
