@@ -15,14 +15,6 @@ import {
   UserButton,
   useUser,
 } from "@clerk/nextjs";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-  useUser,
-} from "@clerk/nextjs";
 import WordCard from "@/components/WordCard";
 import AlphabetFilter from "@/components/AlphabetFilter";
 import Image from "next/image";
@@ -153,12 +145,11 @@ export default function Home() {
         </SignedIn>
       </header>
       <div className="flex flex-col justify-center items-center w-full max-w-3xl mx-auto px-6">
-        <Image src="/logo.png" alt="Lexit Logo" width={60} height={60} />
+        <Image src="/logo.png" alt="Lexit Logo" width={80} height={80} />
         {wordsCount && (
-          <p className="mt-1 text-sm text-gray-600">Total {wordsCount} words</p>
-          <p className="mt-2 text-gray-600">Total {wordsCount} words</p>
+          <p className="mt-1 text-xs text-gray-600">Total {wordsCount} words</p>
         )}
-        <form className="flex my-10 gap-2 w-full">
+        <form className="flex mb-10 mt-5 gap-2 w-full">
           <div className="relative flex-1">
             <Input
               ref={searchInputRef}
