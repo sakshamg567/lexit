@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
@@ -12,6 +12,7 @@ import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const words = useQuery(api.words.getWords) || [];
   const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
@@ -22,22 +23,38 @@ export default function Home() {
     word.word.toLowerCase().includes(query.toLowerCase())
   );
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+        event.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
       <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
         <Image src="/logo.png" alt="Lexit Logo" width={100} height={100} />
         {wordsCount && (
-          <p className="mt-2 text-gray-600">
-            Total {wordsCount} words
-          </p>
+          <p className="mt-2 text-gray-600">Total {wordsCount} words</p>
         )}
         <form className="flex my-10 gap-2 w-full">
-          <Input
-            type="text"
-            placeholder="search words"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          <div className="relative flex-1">
+            <Input
+              ref={searchInputRef}
+              type="text"
+              placeholder="search words"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded border">
+              ⌘K
+            </kbd>
+          </div>
           <Button type="submit">search</Button>
         </form>
       </div>
