@@ -1,26 +1,44 @@
-'use client';
-import NavBar from "@/components/NavBar"
+"use client";
+import NavBar from "@/components/NavBar";
 import { Button } from "@/components/ui/button";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import WordCard from "@/components/WordCard";
+import AlphabetFilter from "@/components/AlphabetFilter";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 
 export default function Vault() {
   const router = useRouter();
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
 
   const { user } = useUser();
-  const userWord = useQuery(api.words.getUserWord, {
-    owner: user ? user.id : "",
-  }) || null;
+  const userWord =
+    useQuery(api.words.getUserWord, {
+      owner: user ? user.id : "",
+    }) || null;
 
   const isOwner = (ownerId: string) => {
-    if (ownerId == user?.id) return true;
+    if (ownerId === user?.id) return true;
     return false;
-  }
+  };
+
+  // Filter words based on selected letter
+  const filteredWords = userWord
+    ? userWord.filter((word) => {
+        if (selectedLetter === null) return true;
+        return word.word.charAt(0).toUpperCase() === selectedLetter;
+      })
+    : [];
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
@@ -50,9 +68,9 @@ export default function Vault() {
 
         {/* Words List */}
         <div className="w-full max-w-3xl mx-auto max-h-[65vh] overflow-y-auto">
-          {userWord && userWord.length > 0 ? (
+          {filteredWords && filteredWords.length > 0 ? (
             <ul>
-              {userWord.reverse().map((word) => (
+              {filteredWords.reverse().map((word) => (
                 <WordCard
                   key={word.word}
                   word={word.word}
@@ -63,9 +81,22 @@ export default function Vault() {
               ))}
             </ul>
           ) : (
-            <p className="flex items-center justify-center">No words found.</p>
+            <p className="flex items-center justify-center">
+              {selectedLetter
+                ? `No words found starting with "${selectedLetter}".`
+                : "No words found."}
+            </p>
           )}
         </div>
+
+        {/* Alphabet Filter */}
+        {userWord && userWord.length > 0 && (
+          <AlphabetFilter
+            words={userWord}
+            selectedLetter={selectedLetter}
+            onLetterSelect={setSelectedLetter}
+          />
+        )}
       </div>
 
       {/* Footer */}
@@ -79,5 +110,5 @@ export default function Vault() {
         </Button>
       </footer>
     </main>
-  )
+  );
 }

@@ -7,8 +7,16 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import WordCard from "@/components/WordCard";
+import AlphabetFilter from "@/components/AlphabetFilter";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
 
@@ -21,15 +29,20 @@ export default function Home() {
   const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
 
   const [query, setQuery] = useState("");
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
 
-  const filteredWords = words.filter((word) =>
-    word.word.toLowerCase().includes(query.toLowerCase())
-  );
+  const filteredWords = words.filter((word) => {
+    const matchesQuery = word.word.toLowerCase().includes(query.toLowerCase());
+    const matchesLetter =
+      selectedLetter === null ||
+      word.word.charAt(0).toUpperCase() === selectedLetter;
+    return matchesQuery && matchesLetter;
+  });
 
   const isOwner = (ownerId: string) => {
-    if (ownerId == user?.id) return true;
+    if (ownerId === user?.id) return true;
     return false;
-  }
+  };
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
@@ -50,9 +63,7 @@ export default function Home() {
       <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
         <Image src="/logo.png" alt="Lexit Logo" width={100} height={100} />
         {wordsCount && (
-          <p className="mt-2 text-gray-600">
-            Total {wordsCount} words
-          </p>
+          <p className="mt-2 text-gray-600">Total {wordsCount} words</p>
         )}
         <form className="flex my-10 gap-2 w-full">
           <Input
@@ -80,9 +91,22 @@ export default function Home() {
             ))}
           </ul>
         ) : (
-          <p className="flex items-center justify-center">No words found.</p>
+          <p className="flex items-center justify-center">
+            {selectedLetter
+              ? `No words found starting with "${selectedLetter}".`
+              : "No words found."}
+          </p>
         )}
       </div>
+
+      {/* Alphabet Filter */}
+      {words.length > 0 && (
+        <AlphabetFilter
+          words={words}
+          selectedLetter={selectedLetter}
+          onLetterSelect={setSelectedLetter}
+        />
+      )}
 
       {/* Footer */}
       <footer className="mt-auto mb-10 ml-auto mx-5">
