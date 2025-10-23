@@ -7,13 +7,15 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
 import WordCard from "@/components/WordCard";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
 
 export default function Home() {
   const router = useRouter();
+
+  const { user } = useUser();
 
   const words = useQuery(api.words.getWords) || [];
   const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
@@ -23,6 +25,11 @@ export default function Home() {
   const filteredWords = words.filter((word) =>
     word.word.toLowerCase().includes(query.toLowerCase())
   );
+
+  const isOwner = (ownerId: string) => {
+    if (ownerId == user?.id) return true;
+    return false;
+  }
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
@@ -68,6 +75,7 @@ export default function Home() {
                 word={word.word}
                 meaning={word.meaning}
                 examples={word.examples}
+                isOwner={isOwner(word.owner || "")}
               />
             ))}
           </ul>

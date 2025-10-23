@@ -17,6 +17,11 @@ export default function Vault() {
     owner: user ? user.id : "",
   }) || null;
 
+  const isOwner = (ownerId: string) => {
+    if (ownerId == user?.id) return true;
+    return false;
+  }
+
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
       <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
@@ -53,6 +58,7 @@ export default function Vault() {
                   word={word.word}
                   meaning={word.meaning}
                   examples={word.examples}
+                  isOwner={isOwner(word.owner || "")}
                 />
               ))}
             </ul>

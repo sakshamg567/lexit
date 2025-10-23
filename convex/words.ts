@@ -84,7 +84,6 @@ export const getUserWord = query({
       .query("words")
       .filter((q) => q.eq(q.field("owner"), args.owner))
       .collect();
-    console.log("owner: ", args.owner);
     return userWords;
   },
 });
