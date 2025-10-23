@@ -49,3 +49,67 @@ export const deleteWord = mutation({
     return false;
   },
 });
+
+
+import { v } from "convex/values";
+import { mutation, query } from "./_generated/server";
+
+export const createWord = mutation({
+  args: {
+    word: v.string(),
+    meaning: v.string(),
+    examples: v.array(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const id = await ctx.db.insert("words", {
+      word: args.word,
+      meaning: args.meaning,
+      examples: args.examples,
+    });
+    return id;
+  },
+});
+
+export const getWords = query({
+  args: {},
+  handler: async (ctx, args) => {
+    const words = await ctx.db.query("words").collect();
+    return words;
+  },
+});
+
+export const getWordByName = query({
+  args: { word: v.string() },
+  handler: async (ctx, args) => {
+    const allWords = await ctx.db.query("words").collect();
+    return allWords.find(
+      (w) => w.word.toLowerCase() === args.word.toLowerCase()
+    );
+  },
+});
+
+export const deleteWord = mutation({
+  args: { word: v.string() },
+  handler: async (ctx, args) => {
+    const word = await ctx.db
+      .query("words")
+      .withIndex("by_word", (q) => q.eq("word", args.word))
+      .first();
+    if (word) {
+      await ctx.db.delete(word._id);
+      return true;
+    }
+    return false;
+  },
+});
+
+export const getTotalWordCount = query({
+  args: {},
+  handler: async (ctx) => {
+    // NOTE: This fetches all documents to count them, which is inefficient
+    // for a large number of records. A more scalable approach would be to
+    // maintain a separate counter document.
+    const words = await ctx.db.query("words").collect();
+    return words.length;
+  },
+});
