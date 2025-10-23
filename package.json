@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.23",
+    "@auth/core": "0.37.0",
+    "@convex-dev/auth": "^0.0.90",
     "@radix-ui/react-slot": "^1.2.3",
     "@vercel/analytics": "^1.5.0",
     "ai": "^5.0.76",
