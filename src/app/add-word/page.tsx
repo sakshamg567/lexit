@@ -15,8 +15,10 @@ const notifyError = (message: string) => toast.error(`${message}`);
 
 export default function AddWord() {
   const router = useRouter();
+
   const words = useQuery(api.words.getWords) || [];
   const createWord = useMutation(api.words.createWord);
+  const updateCount = useMutation(api.words.updateCount);
 
   const [word, setWord] = useState("");
   const [meaning, setMeaning] = useState("");
@@ -123,6 +125,8 @@ export default function AddWord() {
         meaning: meaning,
         examples: examples,
       });
+      void updateCount();
+
       notifySuccess();
       setWord("");
       setMeaningExists(false);

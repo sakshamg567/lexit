@@ -49,3 +49,28 @@ export const deleteWord = mutation({
     return false;
   },
 });
+
+export const updateCount = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const metadata = await ctx.db.query("metadata").collect();
+    let count = 0;
+    if (metadata.length === 0) {
+      count = 1;
+      await ctx.db.insert("metadata", { word_count: count });
+    } else {
+      count = metadata[0].word_count + 1;
+      await ctx.db.patch(metadata[0]._id, { word_count: count });
+    }
+    return count;
+  }
+})
+
+export const getTotalWordCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const metadata = await ctx.db.query("metadata").collect();
+    const count = metadata?.[0]?.word_count || 0;
+    return count;
+  },
+});

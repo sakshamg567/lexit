@@ -12,7 +12,10 @@ import Image from "next/image";
 
 export default function Home() {
   const router = useRouter();
+
   const words = useQuery(api.words.getWords) || [];
+  const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
+
   const [query, setQuery] = useState("");
 
   const filteredWords = words.filter((word) =>
@@ -23,6 +26,11 @@ export default function Home() {
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
       <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
         <Image src="/logo.png" alt="Lexit Logo" width={100} height={100} />
+        {wordsCount && (
+          <p className="mt-2 text-gray-600">
+            Total {wordsCount} words
+          </p>
+        )}
         <form className="flex my-10 gap-2 w-full">
           <Input
             type="text"
