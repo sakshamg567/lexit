@@ -1,4 +1,12 @@
 import type { Metadata } from "next";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from '@clerk/nextjs'
 import { Instrument_Serif } from "next/font/google";
 import { ConvexClientProvider } from "@/utility/ConvexClientProvider";
 import { Analytics } from "@vercel/analytics/next";
@@ -57,24 +65,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${InstrumentSerif.variable} antialiased`}>
-        <ConvexClientProvider>
-          {children}
-          <Analytics />
-          <footer className="fixed bottom-0 left-0 right-0 text-center py-3 text-xs text-gray-500 bg-white/80 backdrop-blur-sm">
-            This is Open Source •{" "}
-            <a
-              href="https://github.com/puang59/lexit"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-black hover:underline"
-            >
-              View on GitHub
-            </a>
-          </footer>
-        </ConvexClientProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${InstrumentSerif.variable} antialiased`}>
+          <ConvexClientProvider>
+            {children}
+            <Analytics />
+            <footer className="fixed bottom-0 left-0 right-0 text-center py-3 text-xs text-gray-500 bg-white/80 backdrop-blur-sm">
+              This is Open Source •{" "}
+              <a
+                href="https://github.com/puang59/lexit"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-black hover:underline"
+              >
+                View on GitHub
+              </a>
+            </footer>
+          </ConvexClientProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -3,12 +3,14 @@ import { mutation, query } from "./_generated/server";
 
 export const createWord = mutation({
   args: {
+    owner: v.string(),
     word: v.string(),
     meaning: v.string(),
     examples: v.array(v.string()),
   },
   handler: async (ctx, args) => {
     const id = await ctx.db.insert("words", {
+      owner: args.owner,
       word: args.word,
       meaning: args.meaning,
       examples: args.examples,
@@ -63,8 +65,8 @@ export const updateCount = mutation({
       await ctx.db.patch(metadata[0]._id, { word_count: count });
     }
     return count;
-  }
-})
+  },
+});
 
 export const getTotalWordCount = query({
   args: {},
@@ -72,5 +74,17 @@ export const getTotalWordCount = query({
     const metadata = await ctx.db.query("metadata").collect();
     const count = metadata?.[0]?.word_count || 0;
     return count;
+  },
+});
+
+export const getUserWord = query({
+  args: { owner: v.string() },
+  handler: async (ctx, args) => {
+    const userWords = await ctx.db
+      .query("words")
+      .filter((q) => q.eq(q.field("owner"), args.owner))
+      .collect();
+    console.log("owner: ", args.owner);
+    return userWords;
   },
 });
