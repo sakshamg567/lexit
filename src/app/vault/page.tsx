@@ -100,15 +100,7 @@ export default function Vault() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-auto mb-10 ml-auto mx-5">
-        <Button
-          size="icon"
-          className="rounded-full"
-          onClick={() => router.push("/add-word")}
-        >
-          <Plus size={16} />
-        </Button>
-      </footer>
+      <footer className="mt-auto mb-10 ml-auto mx-5"></footer>
     </main>
   );
 }

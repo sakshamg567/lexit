@@ -60,12 +60,12 @@ export default function Home() {
           <UserButton />
         </SignedIn>
       </header>
-      <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
-        <Image src="/logo.png" alt="Lexit Logo" width={100} height={100} />
+      <div className="flex flex-col justify-center items-center w-full max-w-3xl mx-auto px-6">
+        <Image src="/logo.png" alt="Lexit Logo" width={60} height={60} />
         {wordsCount && (
-          <p className="mt-2 text-gray-600">Total {wordsCount} words</p>
+          <p className="mt-1 text-sm text-gray-600">Total {wordsCount} words</p>
         )}
-        <form className="flex my-10 gap-2 w-full">
+        <form className="flex my-4 gap-2 w-full">
           <Input
             type="text"
             placeholder="search words"
@@ -77,7 +77,7 @@ export default function Home() {
       </div>
 
       {/* Words List */}
-      <div className="w-full max-w-3xl mx-auto max-h-[65vh] overflow-y-auto">
+      <div className="w-full max-w-3xl mx-auto max-h-[70vh] overflow-y-auto">
         {filteredWords.length > 0 ? (
           <ul>
             {filteredWords.reverse().map((word) => (
@@ -99,20 +99,20 @@ export default function Home() {
         )}
       </div>
 
-      {/* Alphabet Filter */}
-      {words.length > 0 && (
-        <AlphabetFilter
-          words={words}
-          selectedLetter={selectedLetter}
-          onLetterSelect={setSelectedLetter}
-        />
-      )}
-
-      {/* Footer */}
-      <footer className="mt-auto mb-10 ml-auto mx-5">
+      {/* Footer with Alphabet Filter */}
+      <footer className="mt-auto mb-6 w-full flex items-center justify-between">
+        <div className="w-full max-w-3xl mx-auto px-6 flex justify-center">
+          {words.length > 0 && (
+            <AlphabetFilter
+              words={words}
+              selectedLetter={selectedLetter}
+              onLetterSelect={setSelectedLetter}
+            />
+          )}
+        </div>
         <Button
           size="icon"
-          className="rounded-full"
+          className="rounded-full shrink-0 mr-6 mb-2"
           onClick={() => router.push("/add-word")}
         >
           <Plus size={16} />
