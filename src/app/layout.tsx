@@ -6,7 +6,7 @@ import {
   SignedIn,
   SignedOut,
   UserButton,
-} from '@clerk/nextjs'
+} from "@clerk/nextjs";
 import { Instrument_Serif } from "next/font/google";
 import { ConvexClientProvider } from "@/utility/ConvexClientProvider";
 import { Analytics } from "@vercel/analytics/next";
@@ -80,7 +80,12 @@ export default function RootLayout({
                 className="text-black hover:underline"
               >
                 View on GitHub
-              </a>
+              </a>{" "}
+              |{" "}
+              <kbd className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded border">
+                Shift + ?
+              </kbd>{" "}
+              for shortcuts
             </footer>
           </ConvexClientProvider>
         </body>
