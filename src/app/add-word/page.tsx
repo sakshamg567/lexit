@@ -7,7 +7,7 @@ import { api } from "../../../convex/_generated/api";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { ChevronsLeft, LoaderPinwheel } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import WordCard from "@/components/WordCard";
 import { useUser } from "@clerk/nextjs";
 
@@ -16,6 +16,7 @@ const notifyError = (message: string) => toast.error(`${message}`);
 
 export default function AddWord() {
   const router = useRouter();
+  const wordInputRef = useRef<HTMLInputElement>(null);
 
   const { user } = useUser();
 
@@ -120,7 +121,10 @@ export default function AddWord() {
     if (!word.trim()) return notifyError("Word cannot be empty");
     if (word.includes(" ")) return notifyError("Word cannot contain spaces");
     if (alreadyExists) return notifyError("Word already exists");
-    if (meaning.trim().length === 0 || examples.length === 0) return notifyError("Sit Tight while AI generates the meaning and examples!");
+    if (meaning.trim().length === 0 || examples.length === 0)
+      return notifyError(
+        "Sit Tight while AI generates the meaning and examples!"
+      );
     const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
     try {
       void createWord({
@@ -142,7 +146,44 @@ export default function AddWord() {
   const isOwner = (ownerId: string) => {
     if (ownerId == user?.id) return true;
     return false;
-  }
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        wordInputRef.current?.focus();
+        return;
+      }
+
+      if (e.key === "Escape") {
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        ) {
+          e.target.blur();
+        }
+        return;
+      }
+
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      if (e.key === "/") {
+        e.preventDefault();
+        wordInputRef.current?.focus();
+      } else if (e.key === "b") {
+        router.push("/");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [router]);
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
@@ -153,22 +194,27 @@ export default function AddWord() {
           onClick={() => router.push("/")}
         >
           <ChevronsLeft size={16} />
-          Back
+          Back [b]
         </Button>
       </div>
       <div className="w-full max-w-3xl mx-auto px-6">
         <h1 className="text-3xl">Discovered a word?</h1>
         <form className="mt-1" onSubmit={handleSubmit}>
-          <Input
-            type="text"
-            name="word"
-            placeholder="Enter new word"
-            className="mt-5"
-            value={word}
-            onChange={(e) => {
-              setWord(e.target.value);
-            }}
-          />
+          <div className="relative mt-5">
+            <Input
+              ref={wordInputRef}
+              type="text"
+              name="word"
+              placeholder="Enter new word"
+              value={word}
+              onChange={(e) => {
+                setWord(e.target.value);
+              }}
+            />
+            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded border">
+              ⌘K
+            </kbd>
+          </div>
           {meaning.length > 0 && (
             <section>
               <label className="mt-5 block font-medium text-sm text-gray-700">

@@ -7,7 +7,14 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+  useUser,
+} from "@clerk/nextjs";
 import WordCard from "@/components/WordCard";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
@@ -31,18 +38,10 @@ export default function Home() {
   const isOwner = (ownerId: string) => {
     if (ownerId == user?.id) return true;
     return false;
-  }
-        
+  };
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      // Don't trigger shortcuts when typing in inputs
-      if (
-        event.target instanceof HTMLInputElement ||
-        event.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
-
       const wordList = document.querySelector("[data-word-list]");
 
       if (event.key === "k") {
@@ -50,12 +49,40 @@ export default function Home() {
           event.preventDefault();
           searchInputRef.current?.focus();
         } else {
+          if (
+            event.target instanceof HTMLInputElement ||
+            event.target instanceof HTMLTextAreaElement
+          ) {
+            return;
+          }
           event.preventDefault();
-          // Scroll up through word list
           if (wordList) {
             wordList.scrollBy({ top: -100, behavior: "smooth" });
           }
         }
+        return;
+      }
+
+      if (event.key === "Escape") {
+        if (
+          event.target instanceof HTMLInputElement ||
+          event.target instanceof HTMLTextAreaElement
+        ) {
+          event.target.blur();
+          return;
+        }
+        if (showHelp) {
+          setShowHelp(false);
+        } else {
+          setQuery("");
+        }
+        return;
+      }
+
+      if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement
+      ) {
         return;
       }
 
@@ -64,17 +91,9 @@ export default function Home() {
           event.preventDefault();
           searchInputRef.current?.focus();
           break;
-        case "Escape":
-          if (showHelp) {
-            setShowHelp(false);
-          } else {
-            setQuery("");
-          }
-          break;
         case "Enter":
           if (searchInputRef.current === document.activeElement) {
             event.preventDefault();
-            // Search is already handled by the form
           }
           break;
         case "+":
@@ -86,7 +105,6 @@ export default function Home() {
         case "j":
         case "J":
           event.preventDefault();
-          // Scroll down through word list
           if (wordList) {
             wordList.scrollBy({ top: 100, behavior: "smooth" });
           }
@@ -102,7 +120,7 @@ export default function Home() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [router, showHelp]);
+  }, [router, showHelp, setQuery]);
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
