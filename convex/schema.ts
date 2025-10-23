@@ -3,6 +3,7 @@ import { v } from "convex/values";
 
 export default defineSchema({
   words: defineTable({
+    owner: v.optional(v.string()),
     word: v.string(),
     meaning: v.string(),
     examples: v.array(v.string()),
@@ -10,4 +11,4 @@ export default defineSchema({
   metadata: defineTable({
     word_count: v.number(),
   }),
-})
+});

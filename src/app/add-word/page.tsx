@@ -9,12 +9,15 @@ import { useRouter } from "next/navigation";
 import { ChevronsLeft, LoaderPinwheel } from "lucide-react";
 import { useEffect, useState } from "react";
 import WordCard from "@/components/WordCard";
+import { useUser } from "@clerk/nextjs";
 
 const notifySuccess = () => toast.success("Word added successfully!");
 const notifyError = (message: string) => toast.error(`${message}`);
 
 export default function AddWord() {
   const router = useRouter();
+
+  const { user } = useUser();
 
   const words = useQuery(api.words.getWords) || [];
   const createWord = useMutation(api.words.createWord);
@@ -121,6 +124,7 @@ export default function AddWord() {
     const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
     try {
       void createWord({
+        owner: user?.id || "anonymous",
         word: capitalizedWord,
         meaning: meaning,
         examples: examples,
