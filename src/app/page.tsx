@@ -7,8 +7,10 @@ import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import WordCard from "@/components/WordCard";
 import Image from "next/image";
+import NavBar from "@/components/NavBar";
 
 export default function Home() {
   const router = useRouter();
@@ -37,6 +39,20 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
+      <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
+        <NavBar />
+        <SignedOut>
+          <SignInButton>
+            <Button variant="outline">Sign In</Button>
+          </SignInButton>
+          <SignUpButton>
+            <Button>Sign Up</Button>
+          </SignUpButton>
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </header>
       <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
         <Image src="/logo.png" alt="Lexit Logo" width={100} height={100} />
         {wordsCount && (
