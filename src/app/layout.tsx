@@ -72,20 +72,25 @@ export default function RootLayout({
             {children}
             <Analytics />
             <footer className="fixed bottom-0 left-0 right-0 text-center py-3 text-xs text-gray-500 bg-white/80 backdrop-blur-sm">
-              This is Open Source •{" "}
-              <a
-                href="https://github.com/puang59/lexit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-black hover:underline"
-              >
-                View on GitHub
-              </a>{" "}
+              <span className="mr-3">
+
+                This is Open Source •{" "}
+                <a
+                  href="https://github.com/puang59/lexit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-black hover:underline"
+                >
+                  View on GitHub
+                </a>{" "}
+              </span>
               |{" "}
-              <kbd className="bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded border">
-                Shift + ?
-              </kbd>{" "}
-              for shortcuts
+              <span className="ml-3">
+                <kbd className="bg-gray-100 text-gray-600 text-xs px-1 py-0.5 rounded border mr-1">
+                  Shift + ?
+                </kbd>{" "}
+                for shortcuts
+              </span>
             </footer>
           </ConvexClientProvider>
         </body>
