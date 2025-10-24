@@ -14,6 +14,7 @@ import { api } from "../../../convex/_generated/api";
 import WordCard from "@/components/WordCard";
 import AlphabetFilter from "@/components/AlphabetFilter";
 import { useState } from "react";
+import Loader from "@/components/Loader";
 
 export default function Vault() {
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
@@ -78,11 +79,13 @@ export default function Vault() {
               ))}
             </ul>
           ) : (
-            <p className="flex items-center justify-center">
-              {selectedLetter
-                ? `No words found starting with "${selectedLetter}".`
-                : "No words found."}
-            </p>
+            <div>
+              <p className="flex items-center justify-center">
+                {selectedLetter
+                  && `No words found starting with "${selectedLetter}".`}
+              </p>
+              <Loader />
+            </div>
           )}
         </div>
 

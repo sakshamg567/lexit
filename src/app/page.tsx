@@ -19,6 +19,7 @@ import WordCard from "@/components/WordCard";
 import AlphabetFilter from "@/components/AlphabetFilter";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
+import Loader from "@/components/Loader";
 
 export default function Home() {
   const router = useRouter();
@@ -184,11 +185,13 @@ export default function Home() {
             ))}
           </ul>
         ) : (
-          <p className="flex items-center justify-center">
-            {selectedLetter
-              ? `No words found starting with "${selectedLetter}".`
-              : "No words found."}
-          </p>
+          <div>
+            <p className="flex items-center justify-center">
+              {selectedLetter
+                && `No words found starting with "${selectedLetter}".`}
+            </p>
+            <Loader />
+          </div>
         )}
       </div>
 
