@@ -162,7 +162,7 @@ export default function Home() {
               ⌘K
             </kbd>
           </div>
-          <Button type="submit">search</Button>
+          <Button type="submit" className="cursor-pointer">search</Button>
         </form>
       </div>
 
@@ -205,7 +205,7 @@ export default function Home() {
         </div>
         <Button
           size="icon"
-          className="rounded-full shrink-0 mr-6 mb-2"
+          className="rounded-full shrink-0 mr-6 mb-2 cursor-pointer"
           onClick={() => router.push("/add-word")}
         >
           <Plus size={16} />

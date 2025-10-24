@@ -20,6 +20,8 @@ export default function NavBar() {
         router.push("/");
       } else if (e.key === "v") {
         router.push("/vault");
+      } else if (e.key === "c") {
+        router.push("/contributors");
       }
     };
 
@@ -33,8 +35,8 @@ export default function NavBar() {
         variant="ghost"
         className={
           pathname === "/"
-            ? "underline font-bold text-md hover:bg-white"
-            : "text-md hover:bg-white"
+            ? "underline font-bold text-md hover:bg-white cursor-pointer"
+            : "text-md hover:bg-white cursor-pointer"
         }
         onClick={() => router.push("/")}
       >
@@ -45,13 +47,25 @@ export default function NavBar() {
         variant="ghost"
         className={
           pathname === "/vault"
-            ? "underline font-bold text-md hover:bg-white"
-            : "text-md hover:bg-white"
+            ? "underline font-bold text-md hover:bg-white cursor-pointer"
+            : "text-md hover:bg-white cursor-pointer"
         }
         onClick={() => router.push("/vault")}
       >
         {" "}
         Vault {pathname != "/vault" && "[v]"}
+      </Button>
+      <Button
+        variant="ghost"
+        className={
+          pathname === "/contributors"
+            ? "underline font-bold text-md hover:bg-white cursor-pointer"
+            : "text-md hover:bg-white cursor-pointer"
+        }
+        onClick={() => router.push("/contributors")}
+      >
+        {" "}
+        Contributors {pathname != "/contributors" && "[c]"}
       </Button>
     </nav>
   );

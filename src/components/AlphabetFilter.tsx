@@ -34,7 +34,7 @@ export default function AlphabetFilter({
         variant={selectedLetter === null ? "default" : "outline"}
         size="sm"
         onClick={() => onLetterSelect(null)}
-        className="text-xs px-3 py-1 h-7"
+        className="text-xs px-3 py-1 h-7 cursor-pointer"
       >
         All
       </Button>
@@ -45,7 +45,7 @@ export default function AlphabetFilter({
           variant={selectedLetter === letter ? "default" : "outline"}
           size="sm"
           onClick={() => onLetterSelect(letter)}
-          className="text-xs px-2 py-1 h-7 min-w-[28px]"
+          className="text-xs px-2 py-1 h-7 min-w-[28px] cursor-pointer"
         >
           {letter}
         </Button>

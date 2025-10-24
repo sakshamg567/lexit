@@ -34,6 +34,20 @@ export default function AddWord() {
   const [meaningExists, setMeaningExists] = useState(false);
   const [meaningLoading, setMeaningLoading] = useState(false);
   const [examplesLoading, setExamplesLoading] = useState(false);
+  const [greeting, setGreeting] = useState("");
+
+  const greetings = [
+    "Discovered a new word? Let's define it!",
+    "Found a word no one knows? Add it here!",
+    "Help us grow the dictionary! Submit your word.",
+    "Got a rare word? Share its meaning!",
+    "What did you come across?",
+  ]
+
+  useEffect(() => {
+    const random = greetings[Math.floor(Math.random() * greetings.length)];
+    setGreeting(random);
+  }, [])
 
   useEffect(() => {
     setMeaning("");
@@ -190,7 +204,7 @@ export default function AddWord() {
       <div className="w-full max-w-3xl mx-auto px-6">
         <Button
           variant="outline"
-          className="mb-10"
+          className="mb-10 cursor-pointer"
           onClick={() => router.push("/")}
         >
           <ChevronsLeft size={16} />
@@ -198,7 +212,9 @@ export default function AddWord() {
         </Button>
       </div>
       <div className="w-full max-w-3xl mx-auto px-6">
-        <h1 className="text-3xl">Discovered a word?</h1>
+        <h1 className="text-3xl">
+          {greeting}
+        </h1>
         <form className="mt-1" onSubmit={handleSubmit}>
           <div className="relative mt-5">
             <Input
@@ -260,7 +276,7 @@ export default function AddWord() {
               <p>Generating example sentences...</p>
             </div>
           )}
-          <Button type="submit" className="mt-5 w-full">
+          <Button type="submit" className="mt-5 w-full cursor-pointer">
             Add Word
           </Button>
         </form>

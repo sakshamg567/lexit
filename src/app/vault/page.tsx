@@ -13,12 +13,9 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import WordCard from "@/components/WordCard";
 import AlphabetFilter from "@/components/AlphabetFilter";
-import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export default function Vault() {
-  const router = useRouter();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
 
   const { user } = useUser();
@@ -35,9 +32,9 @@ export default function Vault() {
   // Filter words based on selected letter
   const filteredWords = userWord
     ? userWord.filter((word) => {
-        if (selectedLetter === null) return true;
-        return word.word.charAt(0).toUpperCase() === selectedLetter;
-      })
+      if (selectedLetter === null) return true;
+      return word.word.charAt(0).toUpperCase() === selectedLetter;
+    })
     : [];
 
   return (
