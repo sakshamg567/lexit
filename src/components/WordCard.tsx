@@ -1,7 +1,10 @@
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Button } from "./ui/button";
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, Volume2 } from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { cx } from "class-variance-authority";
 
 interface WordCardProps {
   word: string;
@@ -10,8 +13,34 @@ interface WordCardProps {
   isOwner: boolean;
 }
 
-export default function WordCard({ word, meaning, examples, isOwner }: WordCardProps) {
+export default function WordCard({
+  word,
+  meaning,
+  examples,
+  isOwner,
+}: WordCardProps) {
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const deleteWord = useMutation(api.words.deleteWord);
+
+  const speakWord = () => {
+    if (!window.speechSynthesis) {
+      toast.error("Speech synthesis not supported in your browser");
+      return;
+    }
+
+    // Cancel any ongoing speech synthesis
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      toast.error(event.error);
+      setIsSpeaking(false);
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
 
   return (
     <div className="relative mx-10 py-2 px-5 mb-5 border border-zinc-300 rounded-sm">
@@ -25,7 +54,20 @@ export default function WordCard({ word, meaning, examples, isOwner }: WordCardP
           <Trash2Icon size={16} className="text-red-500" />
         </Button>
       )}
-      <h2 className="text-xl font-semibold pr-10">{word}</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-xl font-semibold">{word}</h2>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => speakWord()}
+          disabled={isSpeaking}
+        >
+          <Volume2
+            size={16}
+            className={cx("text-black", isSpeaking && "text-gray-900")}
+          />
+        </Button>
+      </div>
       <p className="italic mb-2">{meaning}</p>
       <ul className="list-disc list-inside">
         {examples.map((example, index) => (
