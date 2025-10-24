@@ -24,23 +24,74 @@ import Loader from "@/components/Loader";
 export default function Home() {
   const router = useRouter();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const wordListRef = useRef<HTMLDivElement>(null);
 
   const { user } = useUser();
 
-  const words = useQuery(api.words.getWords) || [];
-  const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
+  const [allWords, setAllWords] = useState<any[]>([]);
+  const [lastId, setLastId] = useState<string | undefined>(undefined);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const WORDS_PER_PAGE = 20;
 
   const [query, setQuery] = useState("");
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [showHelp, setShowHelp] = useState(false);
 
-  const filteredWords = words.filter((word) => {
-    const matchesQuery = word.word.toLowerCase().includes(query.toLowerCase());
-    const matchesLetter =
-      selectedLetter === null ||
-      word.word.charAt(0).toUpperCase() === selectedLetter;
-    return matchesQuery && matchesLetter;
+  const words = useQuery(api.words.lazyLoadWords, {
+    limit: WORDS_PER_PAGE,
+    startsAfterId: lastId,
+    searchQuery: query || undefined,
+    selectedLetter: selectedLetter || undefined,
   });
+  const wordsCount = useQuery(api.words.getTotalWordCount) || 0;
+
+  useEffect(() => {
+    setAllWords([]);
+    setLastId(undefined);
+    setHasMore(true);
+    setIsLoadingMore(false);
+  }, [query, selectedLetter]);
+
+  useEffect(() => {
+    if (words && words.length > 0) {
+      setAllWords((prev) => {
+        if (lastId === undefined) {
+          return words;
+        }
+        const existingIds = new Set(prev.map((w) => w._id));
+        const newWords = words.filter((w) => !existingIds.has(w._id));
+        return [...prev, ...newWords];
+      });
+      setIsLoadingMore(false);
+
+      if (words.length < WORDS_PER_PAGE) {
+        setHasMore(false);
+      }
+    }
+  }, [words]);
+
+  const handleScroll = () => {
+    if (!wordListRef.current || isLoadingMore || !hasMore) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = wordListRef.current;
+    const scrolledToBottom = scrollHeight - scrollTop - clientHeight < 200;
+
+    if (scrolledToBottom && allWords.length > 0) {
+      setIsLoadingMore(true);
+      const lastWord = allWords[allWords.length - 1];
+      setLastId(lastWord._id);
+    }
+  };
+
+  useEffect(() => {
+    const wordList = wordListRef.current;
+    if (wordList) {
+      wordList.addEventListener("scroll", handleScroll);
+      return () => wordList.removeEventListener("scroll", handleScroll);
+    }
+  }, [allWords, isLoadingMore, hasMore]);
 
   const isOwner = (ownerId: string) => {
     if (ownerId === user?.id) return true;
@@ -163,32 +214,42 @@ export default function Home() {
               ⌘K
             </kbd>
           </div>
-          <Button type="submit" className="cursor-pointer">search</Button>
+          <Button type="submit" className="cursor-pointer">
+            search
+          </Button>
         </form>
       </div>
 
       {/* Words List */}
       <div
+        ref={wordListRef}
         className="w-full max-w-3xl mx-auto max-h-[65vh] overflow-y-auto"
         data-word-list
       >
-        {filteredWords.length > 0 ? (
-          <ul>
-            {filteredWords.reverse().map((word) => (
-              <WordCard
-                key={word.word}
-                word={word.word}
-                meaning={word.meaning}
-                examples={word.examples}
-                isOwner={isOwner(word.owner || "")}
-              />
-            ))}
-          </ul>
+        {allWords.length > 0 ? (
+          <>
+            <ul>
+              {allWords.map((word) => (
+                <WordCard
+                  key={word._id}
+                  word={word.word}
+                  meaning={word.meaning}
+                  examples={word.examples}
+                  isOwner={isOwner(word.owner || "")}
+                />
+              ))}
+            </ul>
+            {isLoadingMore && (
+              <div className="flex justify-center py-4">
+                <Loader />
+              </div>
+            )}
+          </>
         ) : (
           <div>
             <p className="flex items-center justify-center">
-              {selectedLetter
-                && `No words found starting with "${selectedLetter}".`}
+              {selectedLetter &&
+                `No words found starting with "${selectedLetter}".`}
             </p>
             <Loader />
           </div>
@@ -198,9 +259,9 @@ export default function Home() {
       {/* Footer with Alphabet Filter */}
       <footer className="mt-auto mb-6 w-full flex items-center justify-between">
         <div className="w-full max-w-3xl mx-auto px-6 flex justify-center">
-          {words.length > 0 && (
+          {allWords.length > 0 && (
             <AlphabetFilter
-              words={words}
+              words={allWords}
               selectedLetter={selectedLetter}
               onLetterSelect={setSelectedLetter}
             />

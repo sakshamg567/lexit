@@ -27,6 +27,41 @@ export const getWords = query({
   },
 });
 
+export const lazyLoadWords = query({
+  args: {
+    limit: v.number(),
+    startsAfterId: v.optional(v.string()),
+    searchQuery: v.optional(v.string()),
+    selectedLetter: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    let allWords = await ctx.db.query("words").order("desc").collect();
+
+    if (args.searchQuery) {
+      const query = args.searchQuery.toLowerCase();
+      allWords = allWords.filter((w) => w.word.toLowerCase().includes(query));
+    }
+
+    if (args.selectedLetter) {
+      allWords = allWords.filter(
+        (w) => w.word.charAt(0).toUpperCase() === args.selectedLetter
+      );
+    }
+
+    if (args.startsAfterId) {
+      const startIndex = allWords.findIndex(
+        (w) => w._id === args.startsAfterId
+      );
+      if (startIndex !== -1) {
+        return allWords.slice(startIndex + 1, startIndex + 1 + args.limit);
+      }
+      return [];
+    }
+
+    return allWords.slice(0, args.limit);
+  },
+});
+
 export const getWordByName = query({
   args: { word: v.string() },
   handler: async (ctx, args) => {

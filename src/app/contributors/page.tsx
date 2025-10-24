@@ -10,6 +10,7 @@ import {
 } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
+import Image from "next/image";
 
 export default function Contributors() {
   const [contributors, setContributors] = useState([]);
@@ -63,10 +64,14 @@ export default function Contributors() {
                   rel="noopener noreferrer"
                 >
                   <div className="flex flex-col items-center">
-                    <img
+                    <Image
                       src={contributor.avatar}
                       alt={contributor.name}
-                      className="w-20 h-20 rounded-sm"
+                      width={80}
+                      height={80}
+                      className="rounded-sm"
+                      placeholder="blur"
+                      blurDataURL="https:/wikipedia/commons/8/89/Portrait_Placeholder.png"
                     />
                     <p className="mt-2 text-center">{contributor.name}</p>
                   </div>
