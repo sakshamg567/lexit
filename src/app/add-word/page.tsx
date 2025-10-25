@@ -10,6 +10,7 @@ import { ChevronsLeft, LoaderPinwheel } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import WordCard from "@/components/WordCard";
 import { useUser } from "@clerk/nextjs";
+import SmoothFadeLayout from "@/components/SmoothFadePageTransition"
 
 const notifySuccess = () => toast.success("Word added successfully!");
 const notifyError = (message: string) => toast.error(`${message}`);
@@ -201,6 +202,7 @@ export default function AddWord() {
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
+      <SmoothFadeLayout>
       <div className="w-full max-w-3xl mx-auto px-6">
         <Button
           variant="outline"
@@ -313,6 +315,7 @@ export default function AddWord() {
         </div>
       )}
       <Toaster position="bottom-right" />
+      </SmoothFadeLayout>
     </main>
   );
 }

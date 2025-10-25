@@ -16,6 +16,7 @@ import WordCard from "@/components/WordCard";
 import AlphabetFilter from "@/components/AlphabetFilter";
 import { useState, useRef, useEffect } from "react";
 import Loader from "@/components/Loader";
+import SmoothFadeLayout from "@/components/SmoothFadePageTransition"
 
 export default function Vault() {
   const { user } = useUser();
@@ -134,6 +135,7 @@ export default function Vault() {
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
+      <SmoothFadeLayout>
       <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
         <NavBar />
 
@@ -226,6 +228,7 @@ export default function Vault() {
 
       {/* Footer */}
       <footer className="mt-auto mb-10 ml-auto mx-5"></footer>
+      </SmoothFadeLayout>
     </main>
   );
 }

@@ -11,6 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import Loader from "@/components/Loader";
 import Image from "next/image";
+import SmoothFadeLayout from "@/components/SmoothFadePageTransition"
 
 export default function Contributors() {
   const [contributors, setContributors] = useState([]);
@@ -27,6 +28,7 @@ export default function Contributors() {
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
+      <SmoothFadeLayout>
       <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
         <NavBar />
 
@@ -87,6 +89,7 @@ export default function Contributors() {
 
       {/* Footer */}
       <footer className="mt-auto mb-10 ml-auto mx-5"></footer>
+      </SmoothFadeLayout>
     </main>
   );
 }
