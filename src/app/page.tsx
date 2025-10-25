@@ -20,7 +20,8 @@ import AlphabetFilter from "@/components/AlphabetFilter";
 import Image from "next/image";
 import NavBar from "@/components/NavBar";
 import Loader from "@/components/Loader";
-import SmoothFadeLayout from "@/components/SmoothFadePageTransition"
+import SmoothFadeLayout from "@/components/SmoothFadePageTransition";
+import Notification from "@/components/Notification";
 
 export default function Home() {
   const router = useRouter();
@@ -183,6 +184,7 @@ export default function Home() {
 
   return (
     <SmoothFadeLayout>
+      <Notification />
       <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
         <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
           <NavBar />
@@ -201,7 +203,9 @@ export default function Home() {
         <div className="flex flex-col justify-center items-center w-full max-w-3xl mx-auto px-6">
           <Image src="/logo.png" alt="Lexit Logo" width={80} height={80} />
           {wordsCount && (
-            <p className="mt-1 text-xs text-gray-600">Total {wordsCount} words</p>
+            <p className="mt-1 text-xs text-gray-600">
+              Total {wordsCount} words
+            </p>
           )}
           <form className="flex mb-10 mt-5 gap-2 w-full">
             <div className="relative flex-1">
@@ -259,7 +263,7 @@ export default function Home() {
         </div>
 
         {/* Footer with Alphabet Filter */}
-        <footer className="mt-auto mb-6 w-full flex items-center justify-between">
+        <footer className="mt-auto mb-6 w-full flex items-center justify-center">
           <div className="w-full max-w-3xl mx-auto px-6 flex justify-center">
             {allWords.length > 0 && (
               <AlphabetFilter
@@ -269,14 +273,16 @@ export default function Home() {
               />
             )}
           </div>
-          <Button
-            size="icon"
-            className="rounded-full shrink-0 mr-6 mb-2 cursor-pointer"
-            onClick={() => router.push("/add-word")}
-          >
-            <Plus size={16} />
-          </Button>
         </footer>
+
+        {/* Fixed Add Button */}
+        <Button
+          size="icon"
+          className="fixed bottom-20 right-6 rounded-full cursor-pointer z-50"
+          onClick={() => router.push("/add-word")}
+        >
+          <Plus size={16} />
+        </Button>
 
         {/* Help Dialog */}
         {showHelp && (
@@ -352,7 +358,6 @@ export default function Home() {
           </div>
         )}
       </main>
-
     </SmoothFadeLayout>
   );
 }

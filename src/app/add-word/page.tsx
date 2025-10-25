@@ -10,7 +10,7 @@ import { ChevronsLeft, LoaderPinwheel } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import WordCard from "@/components/WordCard";
 import { useUser } from "@clerk/nextjs";
-import SmoothFadeLayout from "@/components/SmoothFadePageTransition"
+import SmoothFadeLayout from "@/components/SmoothFadePageTransition";
 
 const notifySuccess = () => toast.success("Word added successfully!");
 const notifyError = (message: string) => toast.error(`${message}`);
@@ -43,12 +43,12 @@ export default function AddWord() {
     "Help us grow the dictionary! Submit your word.",
     "Got a rare word? Share its meaning!",
     "What did you come across?",
-  ]
+  ];
 
   useEffect(() => {
     const random = greetings[Math.floor(Math.random() * greetings.length)];
     setGreeting(random);
-  }, [])
+  }, []);
 
   useEffect(() => {
     setMeaning("");
@@ -214,9 +214,7 @@ export default function AddWord() {
           </Button>
         </div>
         <div className="w-full max-w-3xl mx-auto px-6">
-          <h1 className="text-3xl">
-            {greeting}
-          </h1>
+          <h1 className="text-3xl">{greeting}</h1>
           <form className="mt-1" onSubmit={handleSubmit}>
             <div className="relative mt-5">
               <Input
@@ -248,12 +246,8 @@ export default function AddWord() {
               />
                 */}
 
-                <div
-                  className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm"
-                >
-                  <span>
-                    {meaning}
-                  </span>
+                <div className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm">
+                  <span>{meaning}</span>
                 </div>
               </section>
             )}
@@ -270,7 +264,7 @@ export default function AddWord() {
                 </label>
                 <div className="mt-2 space-y-2">
                   {examples.map((example, index) => {
-                    const regex = new RegExp(`\\b${word}\\w*`, 'gi');
+                    const regex = new RegExp(`\\b${word}\\w*`, "gi");
                     const parts = example.split(regex);
                     const matches = example.match(regex) || [];
 
@@ -316,7 +310,6 @@ export default function AddWord() {
         )}
         <Toaster position="bottom-right" />
       </main>
-
     </SmoothFadeLayout>
   );
 }

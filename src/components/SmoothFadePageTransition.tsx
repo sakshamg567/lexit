@@ -1,17 +1,17 @@
 import { motion, AnimatePresence, easeOut } from 'framer-motion'
 
 const variants = {
-  initial: { opacity: 0, y: 10, filter: "blur(5px)"},
+  initial: { opacity: 0, y: 10, filter: "blur(5px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
   exit: { opacity: 0, y: -10, filter: "blur(5px)" },
 }
 
 const transition = {
-  duration: 0.3, 
+  duration: 0.3,
   ease: easeOut,
 }
 
-export default function SmoothFadeLayout({ children, className = '' }) {
+export default function SmoothFadeLayout({ children, className = '' }: { children: React.ReactNode, className?: string }) {
   return (
     <AnimatePresence mode="sync">
 

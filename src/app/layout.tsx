@@ -73,7 +73,6 @@ export default function RootLayout({
             <Analytics />
             <footer className="fixed bottom-0 left-0 right-0 text-center py-3 text-xs text-gray-500 bg-white/80 backdrop-blur-sm">
               <span className="mr-3">
-
                 This is Open Source •{" "}
                 <a
                   href="https://github.com/puang59/lexit"
