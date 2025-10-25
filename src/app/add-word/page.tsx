@@ -258,7 +258,7 @@ export default function AddWord() {
               </label>
               <div className="mt-2 space-y-2">
                 {examples.map((example, index) => {
-                  const regex = new RegExp(`\\b${word}\\b`, 'gi');
+                  const regex = new RegExp(`\\b${word}\\w*`, 'gi');
                   const parts = example.split(regex);
                   const matches = example.match(regex) || [];
 
