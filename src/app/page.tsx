@@ -21,7 +21,6 @@ import Image from "next/image";
 import NavBar from "@/components/NavBar";
 import Loader from "@/components/Loader";
 import SmoothFadeLayout from "@/components/SmoothFadePageTransition";
-import Notification from "@/components/Notification";
 
 export default function Home() {
   const router = useRouter();
@@ -184,7 +183,6 @@ export default function Home() {
 
   return (
     <SmoothFadeLayout>
-      <Notification />
       <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
         <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
           <NavBar />

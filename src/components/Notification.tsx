@@ -16,6 +16,19 @@ export default function Notification() {
     }
   }, []);
 
+  useEffect(() => {
+    // Add/remove padding to body based on visibility
+    if (isVisible) {
+      document.body.style.paddingTop = "32px"; // Height of notification banner
+    } else {
+      document.body.style.paddingTop = "0px";
+    }
+
+    return () => {
+      document.body.style.paddingTop = "0px";
+    };
+  }, [isVisible]);
+
   const handleClose = () => {
     localStorage.setItem("notificationClosed", "true");
     setIsVisible(false);
@@ -24,7 +37,7 @@ export default function Notification() {
   if (!isVisible) return null;
 
   return (
-    <div className="sticky top-0 bg-gray-300 text-white px-4 py-1 text-center">
+    <div className="fixed top-0 left-0 right-0 bg-gray-300 text-white px-4 py-1 text-center z-50">
       <p className="text-sm text-black italic">{notification}</p>
       <button
         onClick={handleClose}
