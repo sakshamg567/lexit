@@ -70,11 +70,31 @@ export default function WordCard({
       </div>
       <p className="italic mb-2">{meaning}</p>
       <ul className="list-disc list-inside">
-        {examples.map((example, index) => (
-          <li key={index} className="mb-1">
-            {example}
-          </li>
-        ))}
+        {examples.map((example, index) => {
+          const regex = new RegExp(`\\b${word}\\w*`, "gi");
+          const parts = example.split(regex);
+          const matches = example.match(regex) || [];
+
+          return (
+            <li
+              key={index}
+              className="mb-1"
+            >
+              <span>
+                {parts.map((part, i) => (
+                  <span key={i}>
+                    {part}
+                    {i < matches.length && (
+                      <strong className="font-semibold">
+                        {matches[i]}
+                      </strong>
+                    )}
+                  </span>
+                ))}
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </div>
   );
