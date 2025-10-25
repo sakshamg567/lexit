@@ -20,7 +20,6 @@ export default function Contributors() {
       const res = await fetch("/api/contributors");
       const data = await res.json();
       setContributors(data.contributors);
-      console.log(data.contributors);
     };
 
     getContributors();

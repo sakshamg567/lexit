@@ -6,17 +6,26 @@ export async function GET(request: Request) {
       auth: process.env.GITHUB_TOKEN,
     });
 
-    const { data } = await octokit.request("GET /repos/{owner}/{repo}/contributors", {
+    const { data: pulls } = await octokit.request("GET /repos/{owner}/{repo}/pulls", {
       owner: "puang59",
       repo: "lexit",
-    })
+      state: "closed",
+    });
 
-    const contributors = data.map((contributor) => ({
-      name: contributor.login,
-      avatar: contributor.avatar_url,
-      profile: contributor.html_url,
-    }))
-
+    const contributors = Array.from(
+      new Map(
+        pulls
+          .filter(p => p.merged_at && p.user)
+          .map(p => [
+            p.user!.login,
+            {
+              name: p.user!.login,
+              avatar: p.user!.avatar_url,
+              profile: p.user!.html_url,
+            },
+          ])
+      ).values()
+    );
 
     return new Response(JSON.stringify({ contributors }), {
       status: 200,
