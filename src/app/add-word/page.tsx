@@ -6,18 +6,23 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { ChevronsLeft, LoaderPinwheel } from "lucide-react";
+import { Check, ChevronsLeft, RotateCw } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import WordCard from "@/components/WordCard";
 import { useUser } from "@clerk/nextjs";
+import { motion, AnimatePresence } from "framer-motion";
 
 const notifySuccess = () => toast.success("Word added successfully!");
-const notifyError = (message: string) => toast.error(`${message}`);
+
+// Dummy generator functions
+const generateDummyMeaning = (word: string) =>
+  `Meaning of ${word} (${Math.floor(Math.random() * 100)})`;
+const generateDummyExample = (word: string) =>
+  `${word} used in a sentence example #${Math.floor(Math.random() * 100)}`;
 
 export default function AddWord() {
   const router = useRouter();
   const wordInputRef = useRef<HTMLInputElement>(null);
-
   const { user } = useUser();
 
   const words = useQuery(api.words.getWords) || [];
@@ -28,13 +33,8 @@ export default function AddWord() {
   const [meaning, setMeaning] = useState("");
   const [examples, setExamples] = useState<string[]>([]);
 
-  const [debouncedWord, setDebouncedWord] = useState(word);
-  const [AIDebouncedWord, setAIDebouncedWord] = useState(word);
-
-  const [meaningExists, setMeaningExists] = useState(false);
-  const [meaningLoading, setMeaningLoading] = useState(false);
-  const [examplesLoading, setExamplesLoading] = useState(false);
-  const [greeting, setGreeting] = useState("");
+  const [meaningCooldown, setMeaningCooldown] = useState(false);
+  const [examplesCooldown, setExamplesCooldown] = useState<boolean[]>([]);
 
   const greetings = [
     "Discovered a new word? Let's define it!",
@@ -42,162 +42,119 @@ export default function AddWord() {
     "Help us grow the dictionary! Submit your word.",
     "Got a rare word? Share its meaning!",
     "What did you come across?",
-  ]
+  ];
+  const [greeting, setGreeting] = useState("");
 
+  // Random greeting on load
   useEffect(() => {
-    const random = greetings[Math.floor(Math.random() * greetings.length)];
-    setGreeting(random);
-  }, [])
+    setGreeting(greetings[Math.floor(Math.random() * greetings.length)]);
+  }, []);
 
+  // Auto-generate dummy meaning & examples when the word changes
   useEffect(() => {
-    setMeaning("");
-    setExamples([]);
-
-    const convexSearch = setTimeout(() => {
-      setDebouncedWord(word);
-    }, 500);
-
-    const aiSearch = setTimeout(() => {
-      setAIDebouncedWord(word);
-    }, 2000);
-
-    return () => {
-      (clearTimeout(convexSearch), clearTimeout(aiSearch));
-    };
+    if (!word.trim()) {
+      setMeaning("");
+      setExamples([]);
+      return;
+    }
+    setMeaning(generateDummyMeaning(word));
+    setExamples([generateDummyExample(word), generateDummyExample(word)]);
   }, [word]);
 
+  // Initialize example cooldowns
   useEffect(() => {
-    if (!AIDebouncedWord || meaningExists) return;
+    setExamplesCooldown(examples.map(() => false));
+  }, [examples]);
 
-    const fetchMeaning = async () => {
-      try {
-        setMeaningLoading(true);
-        const res = await fetch("/api/generate-meaning", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ word: AIDebouncedWord }),
-        });
+  // Reload handlers
+  const reloadMeaning = () => {
+    if (meaningCooldown) return;
+    setMeaning(generateDummyMeaning(word));
+    setMeaningCooldown(true);
+    setTimeout(() => setMeaningCooldown(false), 5000);
+  };
 
-        if (!res.ok) throw new Error("Failed to generate meaning");
-        const data = await res.json();
-        setMeaning(data.definition);
-      } catch (error) {
-        notifyError((error as Error).message);
-      } finally {
-        setMeaningLoading(false);
-      }
-    };
+  const reloadExample = (index: number) => {
+    if (examplesCooldown[index]) return;
+    const newExamples = [...examples];
+    newExamples[index] = generateDummyExample(word);
+    setExamples(newExamples);
 
-    const fetchExamples = async () => {
-      try {
-        setExamplesLoading(true);
-        const res = await fetch("/api/generate-examples", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ word: AIDebouncedWord }),
-        });
-
-        if (!res.ok) throw new Error("Failed to generate examples");
-        const data = await res.json();
-        setExamples(data.examples);
-      } catch (error) {
-        notifyError((error as Error).message);
-      } finally {
-        setExamplesLoading(false);
-      }
-    };
-
-    fetchMeaning();
-    fetchExamples();
-  }, [AIDebouncedWord]);
+    setExamplesCooldown(prev => {
+      const updated = [...prev];
+      updated[index] = true;
+      return updated;
+    });
+    setTimeout(() => {
+      setExamplesCooldown(prev => {
+        const updated = [...prev];
+        updated[index] = false;
+        return updated;
+      });
+    }, 5000);
+  };
 
   const existingWords = words.map((w) => w.word.toLowerCase());
   const alreadyExists = existingWords.includes(word.toLowerCase());
 
-  useEffect(() => {
-    if (!word.trim() || !alreadyExists) {
-      setMeaningExists(false);
-    } else if (alreadyExists) {
-      setMeaningExists(true);
-    }
-  }, [alreadyExists]);
-
-  const getWord = useQuery(
-    api.words.getWordByName,
-    debouncedWord ? { word: debouncedWord } : "skip"
-  );
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!word.trim()) return notifyError("Word cannot be empty");
-    if (word.includes(" ")) return notifyError("Word cannot contain spaces");
-    if (alreadyExists) return notifyError("Word already exists");
-    if (meaning.trim().length === 0 || examples.length === 0)
-      return notifyError(
-        "Sit Tight while AI generates the meaning and examples!"
-      );
+    if (!word.trim()) return;
+    if (word.includes(" ")) return;
+    if (alreadyExists) return;
+
     const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
-    try {
-      void createWord({
-        owner: user?.id || "anonymous",
-        word: capitalizedWord,
-        meaning: meaning,
-        examples: examples,
-      });
-      void updateCount();
 
-      notifySuccess();
-      setWord("");
-      setMeaningExists(false);
-    } catch (error) {
-      notifyError((error as Error).message);
-    }
+    void createWord({
+      owner: user?.id || "anonymous",
+      word: capitalizedWord,
+      meaning,
+      examples,
+    });
+    void updateCount();
+    notifySuccess();
+
+    setWord("");
+    setMeaning("");
+    setExamples([]);
   };
 
-  const isOwner = (ownerId: string) => {
-    if (ownerId == user?.id) return true;
-    return false;
-  };
+  const isOwner = (ownerId: string) => ownerId === user?.id;
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        wordInputRef.current?.focus();
-        return;
-      }
+  const [isReload, setIsReload] = useState(false)
 
-      if (e.key === "Escape") {
-        if (
-          e.target instanceof HTMLInputElement ||
-          e.target instanceof HTMLTextAreaElement
-        ) {
-          e.target.blur();
-        }
-        return;
-      }
+  // Reload handler helper
+const handleReload = async (
+  type: "meaning" | "example",
+  index?: number
+) => {
+  if (type === "meaning") {
+    if (meaningCooldown) return;
+    setMeaningCooldown(true);
+    await new Promise((res) => setTimeout(res, 1000));
+    setMeaning(generateDummyMeaning(word));
+    setMeaningCooldown(false);
+  } else if (type === "example" && index !== undefined) {
+    if (examplesCooldown[index]) return;
+    setExamplesCooldown((prev) => {
+      const updated = [...prev];
+      updated[index] = true;
+      return updated;
+    });
 
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        return;
-      }
+    await new Promise((res) => setTimeout(res, 1000));
+    const newExamples = [...examples];
+    newExamples[index] = generateDummyExample(word);
+    setExamples(newExamples);
 
-      if (e.key === "/") {
-        e.preventDefault();
-        wordInputRef.current?.focus();
-      } else if (e.key === "b") {
-        router.push("/");
-      }
-    };
+    setExamplesCooldown((prev) => {
+      const updated = [...prev];
+      updated[index] = false;
+      return updated;
+    });
+  }
+};
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [router]);
 
   return (
     <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
@@ -207,111 +164,112 @@ export default function AddWord() {
           className="mb-10 cursor-pointer"
           onClick={() => router.push("/")}
         >
-          <ChevronsLeft size={16} />
-          Back [b]
+          <ChevronsLeft size={16} /> Back [b]
         </Button>
-      </div>
-      <div className="w-full max-w-3xl mx-auto px-6">
-        <h1 className="text-3xl">
-          {greeting}
-        </h1>
-        <form className="mt-1" onSubmit={handleSubmit}>
-          <div className="relative mt-5">
+
+        <h1 className="text-3xl">{greeting}</h1>
+
+        <form className="mt-5" onSubmit={handleSubmit}>
+          <div className="relative">
             <Input
               ref={wordInputRef}
               type="text"
               name="word"
               placeholder="Enter new word"
               value={word}
-              onChange={(e) => {
-                setWord(e.target.value);
-              }}
+              onChange={(e) => setWord(e.target.value)}
             />
-            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded border">
-              ⌘K
-            </kbd>
           </div>
-          {meaning.length > 0 && (
-            <section>
-              <label className="mt-5 block font-medium text-sm text-gray-700">
-                Definition (generated by AI)
-              </label>
-              {/* 
-              <Input
-                type="text"
-                name="meaning"
-                className="mt-2 border-dashed border-2"
-                value={meaning}
-                onChange={(e) => setMeaning(e.target.value)}
-              />
-                */}
 
-              <div
-                className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm"
+          {/* Meaning Section */}
+        {/* Meaning Section */}
+{meaning && (
+  <section className="relative mt-5">
+    <label className="block font-medium text-sm text-gray-700">
+      Definition (AI placeholder)
+    </label>
+    <div className="flex items-center border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm">
+      <span className="flex-1">{meaning}</span>
+      <button
+        type="button"
+        onClick={() => handleReload("meaning")}
+            className="ml-2 p-1 rounded-md text-neutral-500 bg-neutral-100 hover:bg-neutral-200/50 flex justify-center items-center cursor-pointer"
+      >
+        {meaningCooldown ? (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+          >
+            <RotateCw size={15} className="animate-spin text-black transition-all duration-250 ease-out" />
+          </motion.div>
+        ) : (
+          <RotateCw size={15} />
+        )}
+      </button>
+    </div>
+  </section>
+)}
+
+
+
+          {/* Examples Section */}
+          {/* Examples Section */}
+{examples.length > 0 && (
+  <section className="mt-5">
+    <label className="block font-medium text-sm text-gray-700">
+      Example Sentences (AI placeholders)
+    </label>
+    <div className="mt-2 space-y-2">
+      {examples.map((example, index) => (
+        <div
+          key={index}
+          className="flex items-center border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm"
+        >
+          <span className="flex-1">{example}</span>
+          <button
+            type="button"
+            onClick={() => handleReload("example", index)} // use handleReload helper
+            className="ml-2 p-1 text-neutral-500 rounded-md bg-neutral-100 hover:bg-neutral-200/50 flex justify-center items-center cursor-pointer"
+          >
+            {examplesCooldown[index] ? (
+              <motion.div
+                style={{ display: "flex" }}
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 0.5, ease: "linear" }}
               >
-                <span>
-                  {meaning}
-                </span>
-              </div>
-            </section>
-          )}
-          {meaningLoading && (
-            <div className="flex items-center mt-5 text-gray-500">
-              <LoaderPinwheel className="animate-spin mr-2" color="#6a7282" />
-              <p>Generating definition...</p>
-            </div>
-          )}
-          {examples.length > 0 && (
-            <section>
-              <label className="mt-5 block font-medium text-sm text-gray-700">
-                Example Sentences (generated by AI)
-              </label>
-              <div className="mt-2 space-y-2">
-                {examples.map((example, index) => {
-                  const regex = new RegExp(`\\b${word}\\w*`, 'gi');
-                  const parts = example.split(regex);
-                  const matches = example.match(regex) || [];
+            <RotateCw size={15} className="animate-spin text-black transition-all duration-250 ease-out" />
+              </motion.div>
+            ) : (
+              <RotateCw size={15} />
+            )}
+          </button>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
 
-                  return (
-                    <div
-                      key={index}
-                      className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm"
-                    >
-                      {parts.map((part, partIndex) => (
-                        <span key={partIndex}>
-                          {part}
-                          {matches[partIndex] && (
-                            <strong>{matches[partIndex]}</strong>
-                          )}
-                        </span>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-          {examplesLoading && (
-            <div className="flex items-center mt-5 text-gray-500">
-              <LoaderPinwheel className="animate-spin mr-2" color="#6a7282" />
-              <p>Generating example sentences...</p>
-            </div>
-          )}
+
+
+
           <Button type="submit" className="mt-5 w-full cursor-pointer">
             Add Word
           </Button>
         </form>
+
+        {/* Already exists section */}
+        {alreadyExists && (
+          <div className="flex flex-col mt-5 justify-center items-center">
+            <WordCard
+              word={word}
+              meaning={meaning}
+              examples={examples}
+              isOwner={isOwner(user?.id || "")}
+            />
+          </div>
+        )}
       </div>
-      {alreadyExists && getWord && getWord?.word?.length > 0 && (
-        <div className="flex flex-col mt-5 justify-center items-center">
-          <WordCard
-            word={getWord?.word || ""}
-            meaning={getWord?.meaning || ""}
-            examples={getWord?.examples || []}
-            isOwner={isOwner(getWord?.owner || "")}
-          />
-        </div>
-      )}
+
       <Toaster position="bottom-right" />
     </main>
   );
