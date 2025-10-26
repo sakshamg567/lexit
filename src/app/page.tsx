@@ -199,9 +199,15 @@ export default function Home() {
           </SignedIn>
         </header>
         <div className="flex flex-col justify-center items-center w-full max-w-3xl mx-auto px-6">
-          <Image src="/logo.png" alt="Lexit Logo" width={80} height={80} />
+          <Image
+            src="/logo.png"
+            alt="Lexit Logo"
+            width={80}
+            height={80}
+            className="dark:invert"
+          />
           {wordsCount && (
-            <p className="mt-1 text-xs text-gray-600">
+            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
               Total {wordsCount} words
             </p>
           )}

@@ -152,10 +152,10 @@ export default function Vault() {
           </SignedIn>
         </header>
 
-        <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6">
+        <div className="flex flex-col justify-center items-center mt-5 w-full max-w-3xl mx-auto px-6 dark:text-gray-300">
           <h1 className="text-2xl font-bold">Word Vault</h1>
           {user && (
-            <p className="mt-2 text-gray-600">
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
               Welcome, {user.firstName}! Here are your saved words.
             </p>
           )}

@@ -28,7 +28,7 @@ export default function Contributors() {
 
   return (
     <SmoothFadeLayout>
-      <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden">
+      <main className="flex flex-col items-center justify-center text-black h-screen overflow-hidden dark:text-gray-300">
         <header className="flex justify-end items-center p-4 gap-4 h-16 w-full max-w-3xl mx-auto">
           <NavBar />
 

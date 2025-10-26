@@ -27,8 +27,8 @@ export default function AlphabetFilter({
   }
 
   return (
-    <div className="flex flex-wrap justify-center items-center gap-1 mt-4 mb-4 px-4">
-      <span className="text-sm font-medium text-gray-600 mr-3">Filter by:</span>
+    <div className="flex flex-wrap justify-center items-center gap-1 mt-4 mb-4 px-4 dark:text-gray-200">
+      <span className="text-sm font-medium text-gray-600 mr-3 dark:text-gray-400">Filter by:</span>
 
       <Button
         variant={selectedLetter === null ? "default" : "outline"}
