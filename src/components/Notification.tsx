@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 export default function Notification() {
   const [isVisible, setIsVisible] = useState(false);
-  const notification = "🎉 New Feature: Regenerate Meanings and Examples!";
+  const notification = "🎉 New Feature: Regenerate response & DARK MODE!";
 
   useEffect(() => {
     const notificationClosed = localStorage.getItem("notificationClosed");
