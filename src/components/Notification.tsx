@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 export default function Notification() {
   const [isVisible, setIsVisible] = useState(false);
-  const notification = "🎉 New Feature: Page Transitions and Speech Synthesis!";
+  const notification = "🎉 New Feature: Regenerate Meanings and Examples!";
 
   useEffect(() => {
     const notificationClosed = localStorage.getItem("notificationClosed");
