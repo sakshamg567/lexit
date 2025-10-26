@@ -13,6 +13,8 @@
     "@ai-sdk/google": "^2.0.23",
     "@clerk/nextjs": "^6.34.0",
     "@radix-ui/react-slot": "^1.2.3",
+    "@upstash/ratelimit": "^2.0.6",
+    "@upstash/redis": "^1.35.6",
     "@vercel/analytics": "^1.5.0",
     "ai": "^5.0.76",
     "class-variance-authority": "^0.7.1",

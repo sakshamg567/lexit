@@ -6,24 +6,19 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Check, ChevronsLeft, RotateCw } from "lucide-react";
+import { ChevronsLeft, LoaderPinwheel, RefreshCcwIcon } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import WordCard from "@/components/WordCard";
 import { useUser } from "@clerk/nextjs";
 import SmoothFadeLayout from "@/components/SmoothFadePageTransition";
-import { motion, AnimatePresence } from "framer-motion";
 
 const notifySuccess = () => toast.success("Word added successfully!");
-
-// Dummy generator functions
-const generateDummyMeaning = (word: string) =>
-  `Meaning of ${word} (${Math.floor(Math.random() * 100)})`;
-const generateDummyExample = (word: string) =>
-  `${word} used in a sentence example #${Math.floor(Math.random() * 100)}`;
+const notifyError = (message: string) => toast.error(`${message}`);
 
 export default function AddWord() {
   const router = useRouter();
   const wordInputRef = useRef<HTMLInputElement>(null);
+
   const { user } = useUser();
 
   const words = useQuery(api.words.getWords) || [];
@@ -34,8 +29,13 @@ export default function AddWord() {
   const [meaning, setMeaning] = useState("");
   const [examples, setExamples] = useState<string[]>([]);
 
-  const [meaningCooldown, setMeaningCooldown] = useState(false);
-  const [examplesCooldown, setExamplesCooldown] = useState<boolean[]>([]);
+  const [debouncedWord, setDebouncedWord] = useState(word);
+  const [AIDebouncedWord, setAIDebouncedWord] = useState(word);
+
+  const [meaningExists, setMeaningExists] = useState(false);
+  const [meaningLoading, setMeaningLoading] = useState(false);
+  const [examplesLoading, setExamplesLoading] = useState(false);
+  const [greeting, setGreeting] = useState("");
 
   const greetings = [
     "Discovered a new word? Let's define it!",
@@ -45,111 +45,176 @@ export default function AddWord() {
     "What did you come across?",
   ];
 
-  // Random greeting on load
   useEffect(() => {
     const random = greetings[Math.floor(Math.random() * greetings.length)];
     setGreeting(random);
   }, []);
 
-  // Auto-generate dummy meaning & examples when the word changes
   useEffect(() => {
-    if (!word.trim()) {
-      setMeaning("");
-      setExamples([]);
-      return;
-    }
-    setMeaning(generateDummyMeaning(word));
-    setExamples([generateDummyExample(word), generateDummyExample(word)]);
+    setMeaning("");
+    setExamples([]);
+
+    const convexSearch = setTimeout(() => {
+      setDebouncedWord(word);
+    }, 500);
+
+    const aiSearch = setTimeout(() => {
+      setAIDebouncedWord(word);
+    }, 2000);
+
+    return () => {
+      (clearTimeout(convexSearch), clearTimeout(aiSearch));
+    };
   }, [word]);
 
-  // Initialize example cooldowns
-  useEffect(() => {
-    setExamplesCooldown(examples.map(() => false));
-  }, [examples]);
-
-  // Reload handlers
-  const reloadMeaning = () => {
-    if (meaningCooldown) return;
-    setMeaning(generateDummyMeaning(word));
-    setMeaningCooldown(true);
-    setTimeout(() => setMeaningCooldown(false), 5000);
-  };
-
-  const reloadExample = (index: number) => {
-    if (examplesCooldown[index]) return;
-    const newExamples = [...examples];
-    newExamples[index] = generateDummyExample(word);
-    setExamples(newExamples);
-
-    setExamplesCooldown((prev) => {
-      const updated = [...prev];
-      updated[index] = true;
-      return updated;
-    });
-    setTimeout(() => {
-      setExamplesCooldown((prev) => {
-        const updated = [...prev];
-        updated[index] = false;
-        return updated;
+  const fetchMeaning = async () => {
+    try {
+      setMeaningLoading(true);
+      const res = await fetch("/api/generate-meaning", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ word: AIDebouncedWord }),
       });
-    }, 5000);
+
+      if (res.status === 429)
+        throw new Error(
+          "Rate limit exceeded. Please wait a moment before trying again."
+        );
+      if (!res.ok) throw new Error("Failed to generate meaning");
+      const data = await res.json();
+      setMeaning(data.definition);
+    } catch (error) {
+      notifyError((error as Error).message);
+    } finally {
+      setMeaningLoading(false);
+    }
   };
+
+  const fetchExamples = async () => {
+    try {
+      setExamplesLoading(true);
+      const res = await fetch("/api/generate-examples", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ word: AIDebouncedWord }),
+      });
+
+      if (res.status === 429)
+        throw new Error(
+          "Rate limit exceeded. Please wait a moment before trying again."
+        );
+      if (!res.ok) throw new Error("Failed to generate examples");
+      const data = await res.json();
+      setExamples(data.examples);
+    } catch (error) {
+      notifyError((error as Error).message);
+    } finally {
+      setExamplesLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!AIDebouncedWord || meaningExists) return;
+
+    fetchMeaning();
+    fetchExamples();
+  }, [AIDebouncedWord]);
 
   const existingWords = words.map((w) => w.word.toLowerCase());
   const alreadyExists = existingWords.includes(word.toLowerCase());
 
+  useEffect(() => {
+    if (!word.trim() || !alreadyExists) {
+      setMeaningExists(false);
+    } else if (alreadyExists) {
+      setMeaningExists(true);
+    }
+  }, [alreadyExists]);
+
+  const getWord = useQuery(
+    api.words.getWordByName,
+    debouncedWord ? { word: debouncedWord } : "skip"
+  );
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!word.trim()) return;
-    if (word.includes(" ")) return;
-    if (alreadyExists) return;
-
+    if (!word.trim()) return notifyError("Word cannot be empty");
+    if (word.includes(" ")) return notifyError("Word cannot contain spaces");
+    if (alreadyExists) return notifyError("Word already exists");
+    if (meaning.trim().length === 0 || examples.length === 0)
+      return notifyError(
+        "Sit Tight while AI generates the meaning and examples!"
+      );
     const capitalizedWord = word.charAt(0).toUpperCase() + word.slice(1);
+    try {
+      void createWord({
+        owner: user?.id || "anonymous",
+        word: capitalizedWord,
+        meaning: meaning,
+        examples: examples,
+      });
+      void updateCount();
 
-    void createWord({
-      owner: user?.id || "anonymous",
-      word: capitalizedWord,
-      meaning,
-      examples,
-    });
-    void updateCount();
-    notifySuccess();
-
-    setWord("");
-    setMeaning("");
-    setExamples([]);
+      notifySuccess();
+      setWord("");
+      setMeaningExists(false);
+    } catch (error) {
+      notifyError((error as Error).message);
+    }
   };
 
-  const isOwner = (ownerId: string) => ownerId === user?.id;
+  const isOwner = (ownerId: string) => {
+    if (ownerId == user?.id) return true;
+    return false;
+  };
 
-  const [isReload, setIsReload] = useState(false);
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        wordInputRef.current?.focus();
+        return;
+      }
 
-  // Reload handler helper
-  const handleReload = async (type: "meaning" | "example", index?: number) => {
-    if (type === "meaning") {
-      if (meaningCooldown) return;
-      setMeaningCooldown(true);
-      await new Promise((res) => setTimeout(res, 1000));
-      setMeaning(generateDummyMeaning(word));
-      setMeaningCooldown(false);
-    } else if (type === "example" && index !== undefined) {
-      if (examplesCooldown[index]) return;
-      setExamplesCooldown((prev) => {
-        const updated = [...prev];
-        updated[index] = true;
-        return updated;
-      });
+      if (e.key === "Escape") {
+        if (
+          e.target instanceof HTMLInputElement ||
+          e.target instanceof HTMLTextAreaElement
+        ) {
+          e.target.blur();
+        }
+        return;
+      }
 
-      await new Promise((res) => setTimeout(res, 1000));
-      const newExamples = [...examples];
-      newExamples[index] = generateDummyExample(word);
-      setExamples(newExamples);
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
 
-      setExamplesCooldown((prev) => {
-        const updated = [...prev];
-        updated[index] = false;
-        return updated;
-      });
+      if (e.key === "/") {
+        e.preventDefault();
+        wordInputRef.current?.focus();
+      } else if (e.key === "b") {
+        router.push("/");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [router]);
+
+  const handleRegenerateMeaning = async (type: string) => {
+    try {
+      if (type === "Meaning") await fetchMeaning();
+      else await fetchExamples();
+    } catch (err) {
+      notifyError((err as Error).message);
     }
   };
 
@@ -186,20 +251,19 @@ export default function AddWord() {
             </div>
             {meaning.length > 0 && (
               <section>
-                <label className="mt-5 block font-medium text-sm text-gray-700">
-                  Definition (generated by AI)
-                </label>
-                {/* 
-              <Input
-                type="text"
-                name="meaning"
-                className="mt-2 border-dashed border-2"
-                value={meaning}
-                onChange={(e) => setMeaning(e.target.value)}
-              />
-                */}
-
-                <div className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm">
+                <div className="mt-5 flex items-center justify-between">
+                  <label className="block font-medium text-sm text-gray-700">
+                    Definition (generated by AI)
+                  </label>
+                  <Button
+                    type="button"
+                    className="bg-opacity-0 rounded-md cursor-pointer hover:bg-white transition duration-350 text-gray-500 hover:text-gray-700"
+                    onClick={() => handleRegenerateMeaning("Meaning")}
+                  >
+                    <RefreshCcwIcon size={18} className={meaningLoading ? "animate-spin" : ""} />
+                  </Button>
+                </div>
+                <div className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm flex-1">
                   <span>{meaning}</span>
                 </div>
               </section>
@@ -212,20 +276,28 @@ export default function AddWord() {
             )}
             {examples.length > 0 && (
               <section>
-                <label className="mt-5 block font-medium text-sm text-gray-700">
-                  Example Sentences (generated by AI)
-                </label>
-                <div className="mt-2 space-y-2">
+
+                <div className="flex items-center justify-between mt-5">
+                  <label className="block font-medium text-sm text-gray-700">
+                    Example Sentences (generated by AI)
+                  </label>
+                  <Button
+                    type="button"
+                    className="bg-opacity-0 rounded-md cursor-pointer hover:bg-white transition duration-350 text-gray-500 hover:text-gray-700"
+                    onClick={() => handleRegenerateMeaning("Example")}
+                  >
+                    <RefreshCcwIcon size={18} className={examplesLoading ? "animate-spin" : ""} />
+                  </Button>
+                </div>
+
+                <div className="space-y-2">
                   {examples.map((example, index) => {
                     const regex = new RegExp(`\\b${word}\\w*`, "gi");
                     const parts = example.split(regex);
                     const matches = example.match(regex) || [];
 
                     return (
-                      <div
-                        key={index}
-                        className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm"
-                      >
+                      <div key={index} className="border-dashed border-2 rounded-md px-3 py-2 bg-white text-sm flex-1">
                         {parts.map((part, partIndex) => (
                           <span key={partIndex}>
                             {part}
@@ -261,7 +333,7 @@ export default function AddWord() {
             />
           </div>
         )}
-        <Toaster position="bottom-right" />
+        <Toaster position="top-right" />
       </main>
     </SmoothFadeLayout>
   );
