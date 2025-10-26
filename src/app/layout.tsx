@@ -10,6 +10,7 @@ import {
 import { Instrument_Serif } from "next/font/google";
 import { ConvexClientProvider } from "@/utility/ConvexClientProvider";
 import { Analytics } from "@vercel/analytics/next";
+import Notification from "@/components/Notification";
 import "./globals.css";
 
 const InstrumentSerif = Instrument_Serif({
@@ -69,11 +70,11 @@ export default function RootLayout({
       <html lang="en">
         <body className={`${InstrumentSerif.variable} antialiased`}>
           <ConvexClientProvider>
+            <Notification />
             {children}
             <Analytics />
             <footer className="fixed bottom-0 left-0 right-0 text-center py-3 text-xs text-gray-500 bg-white/80 backdrop-blur-sm">
               <span className="mr-3">
-
                 This is Open Source •{" "}
                 <a
                   href="https://github.com/puang59/lexit"
