@@ -80,14 +80,14 @@ export default function RootLayout({
                   href="https://github.com/puang59/lexit"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-black hover:underline"
+                  className="text-black hover:underline dark:text-white"
                 >
                   View on GitHub
                 </a>{" "}
               </span>
               |{" "}
               <span className="ml-3">
-                <kbd className="bg-gray-100 text-gray-600 text-xs px-1 py-0.5 rounded border mr-1">
+                <kbd className="bg-gray-100 text-gray-600 text-xs px-1 py-0.5 rounded border mr-1 dark:bg-zinc-600 dark:text-gray-300">
                   Shift + ?
                 </kbd>{" "}
                 for shortcuts

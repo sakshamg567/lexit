@@ -188,7 +188,7 @@ export default function Home() {
           <NavBar />
           <SignedOut>
             <SignInButton>
-              <Button variant="outline">Sign In</Button>
+              <Button variant="outline" className="dark:text-white">Sign In</Button>
             </SignInButton>
             <SignUpButton>
               <Button>Sign Up</Button>
@@ -219,6 +219,7 @@ export default function Home() {
                 placeholder="search words"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                className="dark:text-gray-300"
               />
               <kbd className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded border">
                 ⌘K
